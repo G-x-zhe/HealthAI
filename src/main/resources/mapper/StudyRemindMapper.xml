@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.healthai.mapper.StudyRemindMapper">
+
+    <insert id="insert" parameterType="com.healthai.entity.StudyRemindEntity"
+            useGeneratedKeys="true" keyProperty="remindId">
+        INSERT INTO study_remind
+            (user_id, title, content, remind_time, remind_type, status)
+        VALUES
+            (#{userId}, #{title}, #{content}, #{remindTime}, #{remindType}, #{status})
+    </insert>
+
+    <select id="selectByUserId" resultType="com.healthai.entity.StudyRemindEntity">
+        SELECT * FROM study_remind
+        WHERE user_id = #{userId} AND status != 2
+        ORDER BY remind_time ASC
+    </select>
+
+    <select id="selectById" resultType="com.healthai.entity.StudyRemindEntity">
+        SELECT * FROM study_remind WHERE remind_id = #{remindId}
+    </select>
+
+    <update id="updateStatus">
+        UPDATE study_remind SET status = #{status}
+        WHERE remind_id = #{remindId}
+    </update>
+
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.healthai.mapper.ChatHistoryMapper">
+
+    <insert id="insert" parameterType="com.healthai.entity.ChatHistoryEntity"
+            useGeneratedKeys="true" keyProperty="chatId">
+        INSERT INTO ai_chat_history
+        (user_id, question, answer, session_id, model_name, response_time, is_cached, create_time)
+        VALUES
+            (#{userId}, #{question}, #{answer}, #{sessionId}, #{modelName},
+             #{responseTime}, #{isCached}, #{createTime})
+    </insert>
+
+    <!-- 全局历史：时间倒序（PageHelper 分页） -->
+    <select id="selectByUserId" resultType="com.healthai.entity.ChatHistoryEntity">
+        SELECT * FROM ai_chat_history
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 单个会话：带 userId 防越权，时间正序（对话要正序展示） -->
+    <select id="selectBySession" resultType="com.healthai.entity.ChatHistoryEntity">
+        SELECT * FROM ai_chat_history
+        WHERE user_id = #{userId} AND session_id = #{sessionId}
+        ORDER BY create_time ASC
+    </select>
+
+    <select id="selectById" resultType="com.healthai.entity.ChatHistoryEntity">
+        SELECT * FROM ai_chat_history WHERE chat_id = #{chatId}
+    </select>
+
+    <!-- 会话最近 N 条问答：按主键倒序取，Service 反转为时间正序 -->
+    <select id="selectRecentBySession" resultType="com.healthai.entity.ChatHistoryEntity">
+        SELECT * FROM ai_chat_history
+        WHERE user_id = #{userId} AND session_id = #{sessionId}
+        ORDER BY chat_id DESC
+        LIMIT #{limit}
+    </select>
+
+    <delete id="deleteBySession">
+        DELETE FROM ai_chat_history
+        WHERE user_id = #{userId} AND session_id = #{sessionId}
+    </delete>
+
+</mapper>

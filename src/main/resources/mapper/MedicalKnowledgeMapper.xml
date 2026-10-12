@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.healthai.mapper.MedicalKnowledgeMapper">
+
+    <!-- 多条件搜索：<if> 拼可选条件，<foreach>/<where> 由 MyBatis 处理 AND 逻辑 -->
+    <select id="search" resultType="com.healthai.entity.MedicalKnowledgeEntity">
+        SELECT * FROM medical_knowledge
+        <where>
+            status = 1
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (title    LIKE CONCAT('%', #{keyword}, '%')
+                OR content  LIKE CONCAT('%', #{keyword}, '%')
+                OR keywords LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectById" resultType="com.healthai.entity.MedicalKnowledgeEntity">
+        SELECT * FROM medical_knowledge WHERE knowledge_id = #{knowledgeId}
+    </select>
+
+    <!-- 浏览量原子自增，避免"查出来+1+写回"的并发丢失 -->
+    <update id="incrementViewCount">
+        UPDATE medical_knowledge SET view_count = view_count + 1
+        WHERE knowledge_id = #{knowledgeId}
+    </update>
+
+    <select id="selectHotList" resultType="com.healthai.entity.MedicalKnowledgeEntity">
+        SELECT * FROM medical_knowledge
+        WHERE status = 1
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 批量查询：<foreach> 拼 IN 列表，收藏模块也会复用 -->
+    <select id="selectByIds" resultType="com.healthai.entity.MedicalKnowledgeEntity">
+        SELECT * FROM medical_knowledge
+        WHERE knowledge_id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

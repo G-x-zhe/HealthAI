@@ -1,0 +1,59 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: healthai-platform
+  # MySQL
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/healthai_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 1234            # 改成你自己的 MySQL 密码
+  # Redis
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      timeout: 10000ms
+      lettuce:
+        pool:
+          max-active: 200
+          max-idle: 50
+          min-idle: 10
+  # Ollama 大模型
+  ai:
+    ollama:
+      base-url: http://127.0.0.1:11434
+      chat:
+        model: deepseek-r1:1.5b
+        options:
+          temperature: 0.7
+          num_ctx: 2048       # 上下文窗口
+          num_predict: 512    # 最大生成长度
+          num_thread: 8       # CPU 线程数
+
+# MyBatis 配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml     # XML 映射文件位置
+  type-aliases-package: com.healthai.entity
+  configuration:
+    map-underscore-to-camel-case: true         # 下划线自动转驼峰
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl   # 控制台打印 SQL
+
+# PageHelper 分页插件
+pagehelper:
+  helper-dialect: mysql        # 数据库方言
+  reasonable: true             # 页码合理化（小于1查第一页，大于总页数查最后一页）
+  support-methods-arguments: true
+
+# 自定义配置
+healthai:
+  jwt:
+    # 生产环境务必通过环境变量覆盖，不要用默认值
+    secret-key: "healthai-platform-secret-key-2024-medicine-ai-chatbot"
+
+logging:
+  level:
+    com.healthai: info
